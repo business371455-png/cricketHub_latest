@@ -17,6 +17,7 @@ export const createMatch = asyncHandler(async (req, res) => {
         teamName: req.body.teamName,
         matchType: req.body.matchType,
         playersNeeded: req.body.playersNeeded,
+        overs: req.body.overs,
         groundId: req.body.groundId || undefined,
         whatsappLink: req.body.whatsappLink || '',
         startTime: req.body.startTime,
@@ -43,6 +44,16 @@ export const getNearbyMatches = asyncHandler(async (req, res) => {
         .populate('creatorId', 'name disciplineRating profileImage')
         .populate('groundId', 'name location');
 
+    res.json(matches);
+});
+
+// @desc    Get my matches (joined or created)
+// @route   GET /api/matches/my
+// @access  Private
+export const getMyMatches = asyncHandler(async (req, res) => {
+    const matches = await Match.find({ players: req.user._id })
+        .populate('creatorId', 'name disciplineRating profileImage')
+        .sort('-createdAt');
     res.json(matches);
 });
 
@@ -88,6 +99,37 @@ export const joinMatch = asyncHandler(async (req, res) => {
 
     if (match.players.length - 1 >= match.playersNeeded) {
         match.status = 'Confirmed';
+    }
+
+    const updatedMatch = await match.save();
+    res.json(updatedMatch);
+});
+
+// @desc    Leave a match
+// @route   PUT /api/matches/:id/leave
+// @access  Private
+export const leaveMatch = asyncHandler(async (req, res) => {
+    const match = await Match.findById(req.params.id);
+
+    if (!match) {
+        res.status(404);
+        throw new Error('Match not found');
+    }
+
+    if (match.creatorId.toString() === req.user._id.toString()) {
+        res.status(400);
+        throw new Error('Creator cannot leave their own match. Cancel it instead.');
+    }
+
+    if (!match.players.includes(req.user._id)) {
+        res.status(400);
+        throw new Error('You are not in this match');
+    }
+
+    match.players = match.players.filter(p => p.toString() !== req.user._id.toString());
+
+    if (match.status === 'Confirmed' && match.players.length - 1 < match.playersNeeded) {
+        match.status = 'Open';
     }
 
     const updatedMatch = await match.save();

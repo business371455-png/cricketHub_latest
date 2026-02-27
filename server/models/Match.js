@@ -19,6 +19,12 @@ const matchSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    overs: {
+        type: Number,
+        min: 1,
+        max: 50,
+        required: true,
+    },
     players: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
