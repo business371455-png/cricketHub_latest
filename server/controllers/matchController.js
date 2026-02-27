@@ -17,6 +17,7 @@ export const createMatch = asyncHandler(async (req, res) => {
         teamName: req.body.teamName,
         matchType: req.body.matchType,
         playersNeeded: req.body.playersNeeded,
+        overs: req.body.overs,
         groundId: req.body.groundId || undefined,
         whatsappLink: req.body.whatsappLink || '',
         startTime: req.body.startTime,
@@ -134,4 +135,52 @@ export const cancelMatch = asyncHandler(async (req, res) => {
     match.status = 'Cancelled';
     const updatedMatch = await match.save();
     res.json(updatedMatch);
+});
+
+// @desc    Leave a match
+// @route   PUT /api/matches/:id/leave
+// @access  Private
+export const leaveMatch = asyncHandler(async (req, res) => {
+    const match = await Match.findById(req.params.id);
+
+    if (!match) {
+        res.status(404);
+        throw new Error('Match not found');
+    }
+
+    if (!match.players.includes(req.user._id)) {
+        res.status(400);
+        throw new Error('You are not a member of this match');
+    }
+
+    if (match.creatorId.toString() === req.user._id.toString()) {
+        res.status(400);
+        throw new Error('Match creator cannot leave. Cancel the match instead.');
+    }
+
+    match.players = match.players.filter(
+        (player) => player.toString() !== req.user._id.toString()
+    );
+
+    if (match.status === 'Confirmed' && match.players.length - 1 < match.playersNeeded) {
+        match.status = 'Open';
+    }
+
+    const updatedMatch = await match.save();
+    res.json(updatedMatch);
+});
+
+// @desc    Get matches for current user
+// @route   GET /api/matches/my
+// @access  Private
+export const getMyMatches = asyncHandler(async (req, res) => {
+    const matches = await Match.find({
+        players: req.user._id,
+    })
+        .populate('creatorId', 'name profileImage')
+        .populate('players', 'name role profileImage disciplineRating')
+        .populate('groundId', 'name location')
+        .sort({ startTime: -1 });
+
+    res.json(matches);
 });

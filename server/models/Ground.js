@@ -20,6 +20,11 @@ const groundSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    groundType: {
+        type: String,
+        enum: ['Open Ground', 'Net Practice', 'Box Cricket', 'Turf Ground', 'Stadium', 'Indoor'],
+        default: 'Open Ground',
+    },
     images: [{
         type: String,
     }],
@@ -30,6 +35,10 @@ const groundSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    address: {
+        type: String,
+        default: '',
+    },
     slots: [slotSchema],
     location: {
         type: {
@@ -39,7 +48,7 @@ const groundSchema = new mongoose.Schema({
         },
         coordinates: {
             type: [Number], // [longitude, latitude]
-            required: true,
+            default: [0, 0],
         },
     },
     ratings: {
