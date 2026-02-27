@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #28a745;
+  --color-navy: #1a237e;
+  --color-white: #ffffff;
+  --color-red: #dc3545;
+  --color-surface: #0f172a;
+  --color-lime: #4ade80;
+  --color-card: #1e293b;
+  --color-text: #f8fafc;
+
+  --font-sans: "Inter", sans-serif;
+
+  --breakpoint-mobile: 0px;
+  --breakpoint-tablet: 640px;
+  --breakpoint-laptop: 1024px;
+  --breakpoint-desktop: 1280px;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+  }
+}
