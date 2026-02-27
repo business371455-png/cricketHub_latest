@@ -89,7 +89,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
 // @access  Private
 export const getMyBookings = asyncHandler(async (req, res) => {
     const bookings = await Booking.find({ userId: req.user._id })
-        .populate('groundId', 'name location images')
+        .populate('groundId', 'name address location images')
         .sort('-createdAt');
     res.json(bookings);
 });

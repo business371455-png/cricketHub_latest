@@ -3,11 +3,11 @@ import {
     createMatch,
     getNearbyMatches,
     getMatchById,
+    getMyMatches,
     joinMatch,
+    leaveMatch,
     confirmMatch,
     cancelMatch,
-    leaveMatch,
-    getMyMatches,
 } from '../controllers/matchController.js';
 import { protect } from '../middleware/auth.js';
 
@@ -28,3 +28,4 @@ router.put('/:id/confirm', protect, confirmMatch);
 router.put('/:id/cancel', protect, cancelMatch);
 
 export default router;
+

@@ -47,6 +47,16 @@ export const getNearbyMatches = asyncHandler(async (req, res) => {
     res.json(matches);
 });
 
+// @desc    Get my matches (joined or created)
+// @route   GET /api/matches/my
+// @access  Private
+export const getMyMatches = asyncHandler(async (req, res) => {
+    const matches = await Match.find({ players: req.user._id })
+        .populate('creatorId', 'name disciplineRating profileImage')
+        .sort('-createdAt');
+    res.json(matches);
+});
+
 // @desc    Get match details
 // @route   GET /api/matches/:id
 // @access  Public
@@ -95,6 +105,37 @@ export const joinMatch = asyncHandler(async (req, res) => {
     res.json(updatedMatch);
 });
 
+// @desc    Leave a match
+// @route   PUT /api/matches/:id/leave
+// @access  Private
+export const leaveMatch = asyncHandler(async (req, res) => {
+    const match = await Match.findById(req.params.id);
+
+    if (!match) {
+        res.status(404);
+        throw new Error('Match not found');
+    }
+
+    if (match.creatorId.toString() === req.user._id.toString()) {
+        res.status(400);
+        throw new Error('Creator cannot leave their own match. Cancel it instead.');
+    }
+
+    if (!match.players.includes(req.user._id)) {
+        res.status(400);
+        throw new Error('You are not in this match');
+    }
+
+    match.players = match.players.filter(p => p.toString() !== req.user._id.toString());
+
+    if (match.status === 'Confirmed' && match.players.length - 1 < match.playersNeeded) {
+        match.status = 'Open';
+    }
+
+    const updatedMatch = await match.save();
+    res.json(updatedMatch);
+});
+
 // @desc    Confirm match
 // @route   PUT /api/matches/:id/confirm
 // @access  Private
@@ -137,50 +178,3 @@ export const cancelMatch = asyncHandler(async (req, res) => {
     res.json(updatedMatch);
 });
 
-// @desc    Leave a match
-// @route   PUT /api/matches/:id/leave
-// @access  Private
-export const leaveMatch = asyncHandler(async (req, res) => {
-    const match = await Match.findById(req.params.id);
-
-    if (!match) {
-        res.status(404);
-        throw new Error('Match not found');
-    }
-
-    if (!match.players.includes(req.user._id)) {
-        res.status(400);
-        throw new Error('You are not a member of this match');
-    }
-
-    if (match.creatorId.toString() === req.user._id.toString()) {
-        res.status(400);
-        throw new Error('Match creator cannot leave. Cancel the match instead.');
-    }
-
-    match.players = match.players.filter(
-        (player) => player.toString() !== req.user._id.toString()
-    );
-
-    if (match.status === 'Confirmed' && match.players.length - 1 < match.playersNeeded) {
-        match.status = 'Open';
-    }
-
-    const updatedMatch = await match.save();
-    res.json(updatedMatch);
-});
-
-// @desc    Get matches for current user
-// @route   GET /api/matches/my
-// @access  Private
-export const getMyMatches = asyncHandler(async (req, res) => {
-    const matches = await Match.find({
-        players: req.user._id,
-    })
-        .populate('creatorId', 'name profileImage')
-        .populate('players', 'name role profileImage disciplineRating')
-        .populate('groundId', 'name location')
-        .sort({ startTime: -1 });
-
-    res.json(matches);
-});
