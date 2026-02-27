@@ -51,6 +51,7 @@ import bookingRoutes from './routes/bookingRoutes.js';
 import ratingRoutes from './routes/ratingRoutes.js';
 import earningsRoutes from './routes/earningsRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import teamRoutes from './routes/teamRoutes.js';
 
 // Routes
 app.get('/api/health', (req, res) => {
@@ -64,6 +65,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use('/api/earnings', earningsRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/teams', teamRoutes);
 
 // Error Handling Middleware
 app.use(notFound);

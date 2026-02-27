@@ -177,3 +177,4 @@ export const cancelMatch = asyncHandler(async (req, res) => {
     const updatedMatch = await match.save();
     res.json(updatedMatch);
 });
+

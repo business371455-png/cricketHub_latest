@@ -47,7 +47,7 @@ const groundSchema = new mongoose.Schema({
             default: 'Point',
         },
         coordinates: {
-            type: [Number],
+            type: [Number], // [longitude, latitude]
             default: [0, 0],
         },
     },
