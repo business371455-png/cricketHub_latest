@@ -12,6 +12,7 @@ export default function CreateMatchModal({ isOpen, onClose }) {
     const [date, setDate] = useState('');
     const [time, setTime] = useState('');
     const [playersNeeded, setPlayersNeeded] = useState(1);
+    const [overs, setOvers] = useState(10);
     const [loading, setLoading] = useState(false);
 
     const dispatch = useDispatch();
@@ -32,6 +33,7 @@ export default function CreateMatchModal({ isOpen, onClose }) {
                 teamName,
                 matchType,
                 playersNeeded: Number(playersNeeded),
+                overs: Number(overs),
                 startTime
             });
 
@@ -105,6 +107,26 @@ export default function CreateMatchModal({ isOpen, onClose }) {
                         <div>
                             <label className="text-sm text-gray-400 block mb-1">Time</label>
                             <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="w-full bg-[#0F172A] border border-[#ffffff20] text-white px-4 py-3 rounded-xl text-sm" required />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="text-sm text-gray-400 block mb-2">
+                            Overs: <span className="text-[#28A745] font-bold">{overs}</span>
+                        </label>
+                        <input
+                            type="range"
+                            min="1"
+                            max="50"
+                            value={overs}
+                            onChange={(e) => setOvers(Number(e.target.value))}
+                            className="w-full accent-[#28A745]"
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>1</span>
+                            <span>10</span>
+                            <span>20</span>
+                            <span>50</span>
                         </div>
                     </div>
 

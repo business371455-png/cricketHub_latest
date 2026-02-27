@@ -17,7 +17,11 @@ export default function AddGroundForm() {
             setLoading(true);
             await createGround({
                 name: formData.name,
-                location: formData.location,
+                address: formData.location,
+                location: {
+                    type: 'Point',
+                    coordinates: [0, 0], // Default — will be updated with real GPS later
+                },
                 pricePerHour: Number(formData.pricePerHour),
                 amenities: ['Floodlights', 'Pavilion'] // default for MVP
             });

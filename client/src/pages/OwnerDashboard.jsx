@@ -1,29 +1,20 @@
 import { useState, useEffect } from 'react';
 import GroundCard from '../components/GroundCard.jsx';
+import EarningsChart from '../components/EarningsChart.jsx';
+import SlotManager from '../components/SlotManager.jsx';
 import { useNavigate } from 'react-router-dom';
 import { getMyGrounds } from '../services/groundService.js';
-import { getEarningsSummary } from '../services/earningsService.js';
 
 export default function OwnerDashboard() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({
-        daily: 0,
-        weekly: 0,
-        monthly: 0,
-        totalBookings: 0
-    });
     const [myGrounds, setMyGrounds] = useState([]);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const [groundsData, statsData] = await Promise.all([
-                    getMyGrounds(),
-                    getEarningsSummary()
-                ]);
+                const groundsData = await getMyGrounds();
                 setMyGrounds(groundsData);
-                setStats(statsData);
             } catch (err) {
                 console.error("Failed to load owner dashboard", err);
             } finally {
@@ -47,28 +38,18 @@ export default function OwnerDashboard() {
                 </button>
             </div>
 
-            {/* Revenue Summary */}
-            <div className="bg-[#1E293B] rounded-2xl p-5 border border-[#ffffff10] mb-8 shadow-xl">
-                <h3 className="text-gray-400 font-medium mb-4">Revenue Summary</h3>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-[#0F172A] p-4 rounded-xl border border-[#ffffff05]">
-                        <p className="text-sm text-gray-400 mb-1">Today</p>
-                        <p className="text-2xl font-bold text-white">₹{stats.daily}</p>
-                    </div>
-                    <div className="bg-[#0F172A] p-4 rounded-xl border border-[#ffffff05]">
-                        <p className="text-sm text-gray-400 mb-1">This Week</p>
-                        <p className="text-2xl font-bold text-white">₹{stats.weekly}</p>
-                    </div>
-                    <div className="bg-[#0F172A] p-4 rounded-xl border border-[#ffffff05]">
-                        <p className="text-sm text-gray-400 mb-1">This Month</p>
-                        <p className="text-2xl font-bold text-white">₹{stats.monthly}</p>
-                    </div>
-                    <div className="bg-[#28A745]/10 p-4 rounded-xl border border-[#28A745]/20">
-                        <p className="text-sm text-[#28A745] mb-1 font-medium">Total Bookings</p>
-                        <p className="text-2xl font-bold text-[#28A745]">{stats.totalBookings}</p>
-                    </div>
+            {/* Earnings Chart */}
+            <EarningsChart />
+
+            {/* Slot Manager for first ground */}
+            {myGrounds.length > 0 && (
+                <div className="my-8">
+                    <SlotManager
+                        slots={myGrounds[0]?.slots || []}
+                        onSlotToggle={(slotData) => console.log('Slot toggled:', slotData)}
+                    />
                 </div>
-            </div>
+            )}
 
             <h2 className="text-xl font-bold text-white mb-4">My Grounds</h2>
             {myGrounds.length === 0 ? (

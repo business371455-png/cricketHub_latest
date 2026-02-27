@@ -10,6 +10,9 @@ import OwnerDashboard from './pages/OwnerDashboard.jsx';
 import AddGroundForm from './pages/AddGroundForm.jsx';
 import Profile from './pages/Profile.jsx';
 import Bookings from './pages/MyBookings.jsx';
+import MyTeams from './pages/MyTeams.jsx';
+import TeamDetail from './pages/TeamDetail.jsx';
+import MyMatches from './pages/MyMatches.jsx';
 
 function App() {
   return (
@@ -27,6 +30,9 @@ function App() {
         <Route path="/matches/:id" element={<MatchDetail />} />
         <Route path="/grounds/:id" element={<GroundDetail />} />
         <Route path="/bookings" element={<Bookings />} />
+        <Route path="/my-teams" element={<MyTeams />} />
+        <Route path="/teams/:id" element={<TeamDetail />} />
+        <Route path="/my-matches" element={<MyMatches />} />
       </Route>
     </Routes>
   );

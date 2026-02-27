@@ -83,7 +83,7 @@ export default function GroundDetail() {
                     <div>
                         <span className="bg-[#28A745] text-white text-xs px-2 py-1 rounded font-bold uppercase tracking-wider mb-2 inline-block">Premium</span>
                         <h1 className="text-3xl font-bold text-white mb-1 drop-shadow-lg">{ground.name}</h1>
-                        <p className="text-gray-200 font-medium flex items-center gap-1 drop-shadow-md">📍 {ground.location}</p>
+                        <p className="text-gray-200 font-medium flex items-center gap-1 drop-shadow-md">📍 {ground.address || 'Location not set'}</p>
                     </div>
                 </div>
             </div>

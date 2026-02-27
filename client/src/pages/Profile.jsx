@@ -1,11 +1,17 @@
-import { useSelector } from 'react-redux';
+import { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { logout, setCredentials } from '../features/auth/authSlice.js';
+import * as userService from '../services/userService.js';
+import EditProfileModal from '../components/EditProfileModal.jsx';
 
 export default function Profile() {
-    const { user } = useSelector(state => state.auth);
+    const { user, token } = useSelector(state => state.auth);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [toggling, setToggling] = useState(false);
 
-    // If no user is logged in, perhaps redirect or show loading
     if (!user) {
         return (
             <div className="p-8 text-center text-white">
@@ -14,6 +20,34 @@ export default function Profile() {
             </div>
         );
     }
+
+    const handleToggleRole = async () => {
+        setToggling(true);
+        try {
+            const result = await userService.toggleRole();
+            dispatch(setCredentials({
+                user: { ...user, isOwner: result.isOwner },
+                token,
+            }));
+        } catch (err) {
+            console.error('Toggle role error:', err);
+            alert(err.response?.data?.message || 'Failed to toggle role');
+        } finally {
+            setToggling(false);
+        }
+    };
+
+    const handleSignOut = () => {
+        if (!confirm('Are you sure you want to sign out?')) return;
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        dispatch(logout());
+        navigate('/');
+    };
+
+    const handleProfileUpdated = (updatedUser) => {
+        dispatch(setCredentials({ user: updatedUser, token }));
+    };
 
     return (
         <div className="p-4 lg:p-8 pb-24 min-h-screen relative">
@@ -35,18 +69,49 @@ export default function Profile() {
                     <p className="text-[#28A745] font-medium mb-1">{user.role || 'All-rounder'}</p>
                     <p className="text-gray-400 text-sm mb-6">{user.phone}</p>
 
-                    <div className="flex justify-around bg-[#0F172A] p-4 rounded-2xl border border-[#ffffff05]">
+                    <div className="flex justify-around bg-[#0F172A] p-4 rounded-2xl border border-[#ffffff05] mb-6">
                         <div>
-                            <p className="text-sm text-gray-400">Owner</p>
-                            <p className="text-lg font-bold text-white">{user.isOwner ? 'Yes' : 'No'}</p>
+                            <p className="text-sm text-gray-400">Mode</p>
+                            <p className="text-lg font-bold text-white">{user.isOwner ? '🏟️ Owner' : '🏏 Player'}</p>
                         </div>
                         <div>
                             <p className="text-sm text-gray-400">Discipline</p>
                             <p className="text-xl font-bold text-[#28A745]">{user.disciplineRating ? user.disciplineRating.toFixed(1) : '5.0'}</p>
                         </div>
                     </div>
+
+                    {/* Action Buttons */}
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => setShowEditModal(true)}
+                            className="w-full py-3 rounded-xl bg-[#28A745] text-white font-bold hover:bg-[#218838] active:scale-[0.98] transition-all shadow-lg shadow-[#28A745]/30"
+                        >
+                            ✏️ Edit Profile
+                        </button>
+
+                        <button
+                            onClick={handleToggleRole}
+                            disabled={toggling}
+                            className="w-full py-3 rounded-xl bg-[#1A237E] text-white font-bold hover:bg-[#1A237E]/80 active:scale-[0.98] transition-all border border-[#ffffff10] disabled:opacity-50"
+                        >
+                            {toggling ? 'Switching...' : `Switch to ${user.isOwner ? 'Player' : 'Owner'} Mode`}
+                        </button>
+
+                        <button
+                            onClick={handleSignOut}
+                            className="w-full py-3 rounded-xl bg-transparent border border-red-500/40 text-red-400 font-bold hover:bg-red-500/10 active:scale-[0.98] transition-all"
+                        >
+                            🚪 Sign Out
+                        </button>
+                    </div>
                 </div>
             </div>
+
+            <EditProfileModal
+                isOpen={showEditModal}
+                onClose={() => setShowEditModal(false)}
+                onProfileUpdated={handleProfileUpdated}
+            />
         </div>
     );
 }

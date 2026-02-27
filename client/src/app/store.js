@@ -3,6 +3,7 @@ import authReducer from '../features/auth/authSlice.js';
 import matchReducer from '../features/match/matchSlice.js';
 import groundReducer from '../features/ground/groundSlice.js';
 import bookingReducer from '../features/booking/bookingSlice.js';
+import teamReducer from '../features/team/teamSlice.js';
 
 export const store = configureStore({
     reducer: {
@@ -10,5 +11,6 @@ export const store = configureStore({
         matches: matchReducer,
         grounds: groundReducer,
         bookings: bookingReducer,
+        teams: teamReducer,
     },
 });

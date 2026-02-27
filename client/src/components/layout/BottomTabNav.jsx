@@ -11,8 +11,9 @@ const BottomTabNav = () => {
         { name: 'Profile', path: '/profile', icon: '👤' },
     ] : [
         { name: 'Home', path: '/home', icon: '🏠' },
+        { name: 'Matches', path: '/my-matches', icon: '🏏' },
+        { name: 'Teams', path: '/my-teams', icon: '👥' },
         { name: 'Search', path: '/grounds', icon: '🔍' },
-        { name: 'Bookings', path: '/bookings', icon: '📅' },
         { name: 'Profile', path: '/profile', icon: '👤' },
     ];
 
