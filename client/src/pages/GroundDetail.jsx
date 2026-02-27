@@ -3,6 +3,25 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getGroundById } from '../services/groundService.js';
 import { createBooking, verifyPayment } from '../services/bookingService.js';
 
+// Generate demo time slots for today
+const generateTodaySlots = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const slots = [
+        { label: '06:00 AM – 08:00 AM', startH: 6, endH: 8, isBooked: false, priceMod: 0 },
+        { label: '08:00 AM – 10:00 AM', startH: 8, endH: 10, isBooked: false, priceMod: 0 },
+        { label: '10:00 AM – 12:00 PM', startH: 10, endH: 12, isBooked: false, priceMod: 0 },
+        { label: '02:00 PM – 04:00 PM', startH: 14, endH: 16, isBooked: false, priceMod: 0 },
+        { label: '04:00 PM – 06:00 PM', startH: 16, endH: 18, isBooked: false, priceMod: 0 },
+        { label: '06:00 PM – 08:00 PM', startH: 18, endH: 20, isBooked: false, priceMod: 200 },
+    ];
+    return slots.map((s, i) => ({
+        ...s,
+        id: String(i + 1),
+        slotStart: `${today}T${String(s.startH).padStart(2, '0')}:00:00.000Z`,
+        slotEnd: `${today}T${String(s.endH).padStart(2, '0')}:00:00.000Z`,
+    }));
+};
+
 export default function GroundDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -32,23 +51,23 @@ export default function GroundDetail() {
 
         try {
             setIsBooking(true);
+            const totalAmount = ground.pricePerHour + (selectedSlot.priceMod || 0);
 
-            // 1. Create Booking (Locks Slot)
-            const booking = await createBooking({
+            // 1. Create Booking with correct payload
+            const { booking } = await createBooking({
                 groundId: ground._id,
-                date: new Date().toISOString().split('T')[0], // Today for demo
-                slotTime: selectedSlot.time
+                slotStart: selectedSlot.slotStart,
+                slotEnd: selectedSlot.slotEnd,
+                amount: totalAmount,
             });
 
             // 2. Mock Razorpay/Gateway Payment
-            // In a real app, we'd open the Razorpay widget here
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            // 3. Verify Payment
+            // 3. Verify Payment with correct field names
             await verifyPayment({
                 bookingId: booking._id,
-                paymentId: 'mock_pay_' + Date.now(),
-                signature: 'mock_sig'
+                transactionId: 'mock_txn_' + Date.now(),
             });
 
             alert('Booking Successful!');
@@ -64,14 +83,8 @@ export default function GroundDetail() {
     if (loading) return <div className="p-8 text-white">Loading...</div>;
     if (!ground) return null;
 
-    // Use actual slots from DB if available, else fallback
-    const displaySlots = ground.slots?.length > 0 ? ground.slots : [
-        { id: '1', time: '06:00 AM - 08:00 AM', isBooked: false, priceMod: 0 },
-        { id: '2', time: '08:00 AM - 10:00 AM', isBooked: true, priceMod: 0 },
-        { id: '3', time: '10:00 AM - 12:00 PM', isBooked: false, priceMod: 0 },
-        { id: '4', time: '04:00 PM - 06:00 PM', isBooked: false, priceMod: 0 },
-        { id: '5', time: '06:00 PM - 08:00 PM', isBooked: false, priceMod: 200 },
-    ];
+    const displaySlots = generateTodaySlots();
+    const groundTypeLabel = ground.groundType || 'Open Ground';
 
     return (
         <div className="min-h-screen bg-[#0F172A] pb-24">
@@ -81,7 +94,10 @@ export default function GroundDetail() {
                         ←
                     </button>
                     <div>
-                        <span className="bg-[#28A745] text-white text-xs px-2 py-1 rounded font-bold uppercase tracking-wider mb-2 inline-block">Premium</span>
+                        <div className="flex gap-2 mb-2">
+                            <span className="bg-[#28A745] text-white text-xs px-2 py-1 rounded font-bold uppercase tracking-wider inline-block">Premium</span>
+                            <span className="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded font-bold border border-blue-500/30 inline-block">{groundTypeLabel}</span>
+                        </div>
                         <h1 className="text-3xl font-bold text-white mb-1 drop-shadow-lg">{ground.name}</h1>
                         <p className="text-gray-200 font-medium flex items-center gap-1 drop-shadow-md">📍 {ground.address || 'Location not set'}</p>
                     </div>
@@ -115,17 +131,17 @@ export default function GroundDetail() {
                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
                         {displaySlots.map(slot => (
                             <button
-                                key={slot.id || slot._id || slot.time}
+                                key={slot.id}
                                 disabled={slot.isBooked}
                                 onClick={() => setSelectedSlot(slot)}
                                 className={`p-4 rounded-xl border text-left transition-all ${slot.isBooked
                                     ? 'bg-red-500/5 border-red-500/10 text-red-500/40 cursor-not-allowed'
-                                    : selectedSlot?.time === slot.time
+                                    : selectedSlot?.id === slot.id
                                         ? 'bg-[#28A745]/20 border-[#28A745] text-white shadow-lg shadow-[#28A745]/20 scale-[1.02]'
                                         : 'bg-[#1E293B] border-[#ffffff10] text-gray-300 hover:bg-[#ffffff05] hover:border-gray-500'
                                     }`}
                             >
-                                <div className="font-semibold text-sm">{slot.time}</div>
+                                <div className="font-semibold text-sm">{slot.label}</div>
                                 {slot.priceMod > 0 && <div className="text-xs text-[#28A745] mt-1 font-medium">+₹{slot.priceMod} (Lights)</div>}
                             </button>
                         ))}

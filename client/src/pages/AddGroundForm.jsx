@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createGround } from '../services/groundService.js';
 
+const GROUND_TYPES = ['Open Ground', 'Net Practice', 'Box Cricket', 'Turf Ground', 'Stadium', 'Indoor'];
+
 export default function AddGroundForm() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
+        groundType: 'Open Ground',
         location: '',
         pricePerHour: ''
     });
@@ -17,13 +20,14 @@ export default function AddGroundForm() {
             setLoading(true);
             await createGround({
                 name: formData.name,
+                groundType: formData.groundType,
                 address: formData.location,
                 location: {
                     type: 'Point',
-                    coordinates: [0, 0], // Default — will be updated with real GPS later
+                    coordinates: [0, 0],
                 },
                 pricePerHour: Number(formData.pricePerHour),
-                amenities: ['Floodlights', 'Pavilion'] // default for MVP
+                amenities: ['Floodlights', 'Pavilion']
             });
             alert('Ground Added Successfully!');
             navigate('/owner');
@@ -64,6 +68,25 @@ export default function AddGroundForm() {
                         />
                     </div>
 
+                    {/* Ground Type Selector */}
+                    <div>
+                        <label className="text-sm text-gray-400 block mb-3">Ground Type</label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {GROUND_TYPES.map(type => (
+                                <button
+                                    key={type}
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, groundType: type })}
+                                    className={`py-2.5 px-2 rounded-xl text-xs font-medium transition-all border ${formData.groundType === type
+                                        ? 'bg-[#28A745] text-white border-[#28A745] shadow-lg shadow-[#28A745]/30'
+                                        : 'bg-[#0F172A] text-gray-300 border-[#ffffff10] hover:border-[#28A745]/50'}`}
+                                >
+                                    {type}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     <div>
                         <label className="text-sm text-gray-400 block mb-2">Location/Address</label>
                         <input
@@ -72,7 +95,7 @@ export default function AddGroundForm() {
                             value={formData.location}
                             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                             className="w-full bg-[#0F172A] border border-[#ffffff20] text-white px-4 py-3 rounded-xl focus:border-[#28A745] focus:outline-none transition-colors"
-                            placeholder="e.g. Sector 5, Salt Lake"
+                            placeholder="e.g. Bhankrota, Jaipur"
                         />
                     </div>
 
@@ -88,8 +111,8 @@ export default function AddGroundForm() {
                         />
                     </div>
 
-                    <button type="submit" className="w-full bg-[#28A745] text-white py-4 rounded-xl font-bold mt-8 shadow-lg shadow-[#28A745]/30 hover:bg-[#218838] transition-all active:scale-[0.98]">
-                        Publish Ground
+                    <button type="submit" disabled={loading} className="w-full bg-[#28A745] text-white py-4 rounded-xl font-bold mt-8 shadow-lg shadow-[#28A745]/30 hover:bg-[#218838] transition-all active:scale-[0.98] disabled:opacity-50">
+                        {loading ? 'Publishing...' : 'Publish Ground'}
                     </button>
                 </form>
             </div>

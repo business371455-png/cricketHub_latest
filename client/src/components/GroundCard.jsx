@@ -18,7 +18,10 @@ export default function GroundCard({ ground }) {
                     <h3 className="text-lg font-bold text-white truncate pr-4">{ground.name}</h3>
                     <span className="text-[#28A745] font-bold">₹{ground.pricePerHour}<span className="text-xs font-normal text-gray-400">/hr</span></span>
                 </div>
-                <p className="text-gray-400 text-sm mb-4">📍 {ground.address || 'Location not set'}</p>
+                <p className="text-gray-400 text-sm mb-1">📍 {ground.address || 'Location not set'}</p>
+                {ground.groundType && (
+                    <span className="text-xs bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-lg border border-blue-500/20 mb-3 inline-block">{ground.groundType}</span>
+                )}
 
                 <div className="flex gap-2">
                     {ground.amenities?.slice(0, 3).map((amenity, i) => (
