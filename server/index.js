@@ -1,4 +1,7 @@
 import express from 'express';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -16,6 +19,10 @@ if (ENV.MONGODB_URI && ENV.MONGODB_URI.includes('mongodb')) {
 }
 
 const app = express();
+
+// ES-module __dirname equivalent
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Middleware Stack
 // 1. Security Headers
@@ -66,6 +73,22 @@ app.use('/api/ratings', ratingRoutes);
 app.use('/api/earnings', earningsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/teams', teamRoutes);
+
+// ---------- Serve Frontend Build (Production) ----------
+const clientDistPath = path.resolve(__dirname, '../client/dist');
+
+if (fs.existsSync(clientDistPath)) {
+    // Serve static assets (JS, CSS, images, etc.)
+    app.use(express.static(clientDistPath));
+
+    // SPA fallback — any non-API GET request serves index.html
+    // so that React Router can handle client-side routing
+    app.get(/^(?!\/api\/).*/, (req, res) => {
+        res.sendFile(path.resolve(clientDistPath, 'index.html'));
+    });
+} else {
+    console.warn('⚠️  client/dist not found — frontend will not be served. Run "npm run build" in /client first.');
+}
 
 // Error Handling Middleware
 app.use(notFound);
