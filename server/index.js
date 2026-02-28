@@ -25,8 +25,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Middleware Stack
-// 1. Security Headers
-app.use(helmet());
+// 1. Security Headers (disable CSP so the SPA can load its own scripts/styles)
+app.use(helmet({
+    contentSecurityPolicy: false,
+}));
 
 // 2. CORS
 app.use(cors({
