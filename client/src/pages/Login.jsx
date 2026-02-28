@@ -9,25 +9,30 @@ export default function Login() {
     const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState('');
     const [step, setStep] = useState(1);
+    const [mockOtpMsg, setMockOtpMsg] = useState('');
+    const [errorMsg, setErrorMsg] = useState('');
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const handleSendOtp = async (e) => {
         e.preventDefault();
+        setErrorMsg('');
+        setMockOtpMsg('');
         if (phone.length >= 10) {
             try {
                 const response = await sendOtpApi(phone);
                 setStep(2);
-                alert(`Mock SMS Sent! Your OTP is: ${response.mockOtp}`);
+                setMockOtpMsg(`Mock OTP: ${response.mockOtp}`);
             } catch (err) {
                 console.error('Failed to send OTP', err);
-                alert('Failed to send OTP. Try again.');
+                setErrorMsg('Failed to send OTP. Try again.');
             }
         }
     };
 
     const handleVerifyOtp = async (e) => {
         e.preventDefault();
+        setErrorMsg('');
         try {
             const userData = await verifyOtpToken(phone, otp);
             dispatch(setCredentials({ user: userData, token: userData.token }));
@@ -42,7 +47,7 @@ export default function Login() {
             }
         } catch (err) {
             console.error('OTP Verification Error', err);
-            alert('Invalid OTP. Please try again.');
+            setErrorMsg('Invalid OTP. Please try again.');
         }
     };
 
@@ -55,6 +60,20 @@ export default function Login() {
                     <h1 className="text-3xl font-bold text-white tracking-tight">Cricket Connect</h1>
                     <p className="text-gray-400 mt-2">The Digital Pavilion 2.0</p>
                 </div>
+
+                {/* Mock OTP Banner */}
+                {mockOtpMsg && (
+                    <div className="mb-4 bg-[#28A745]/20 border border-[#28A745] text-[#4ade80] px-4 py-3 rounded-xl text-center text-lg font-bold animate-pulse">
+                        {mockOtpMsg}
+                    </div>
+                )}
+
+                {/* Error Banner */}
+                {errorMsg && (
+                    <div className="mb-4 bg-red-500/20 border border-red-500 text-red-400 px-4 py-3 rounded-xl text-center text-sm">
+                        {errorMsg}
+                    </div>
+                )}
 
                 {step === 1 ? (
                     <form onSubmit={handleSendOtp} className="space-y-6">
