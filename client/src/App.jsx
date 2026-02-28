@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout.jsx';
+import LandingPage from './pages/LandingPage.jsx';
 import Login from './pages/Login.jsx';
 import ProfileSetup from './pages/ProfileSetup.jsx';
 import PlayerHome from './pages/PlayerHome.jsx';
@@ -17,7 +18,8 @@ import MyMatches from './pages/MyMatches.jsx';
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/profile-setup" element={<ProfileSetup />} />
 
       {/* Routes with Navigation Layout */}
