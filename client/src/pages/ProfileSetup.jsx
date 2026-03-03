@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { updateUserProfile } from '../services/userService.js';
@@ -9,6 +9,19 @@ export default function ProfileSetup() {
     const [role, setRole] = useState('All-rounder');
     const [isOwner, setIsOwner] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [profileImage, setProfileImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const fileInputRef = useRef(null);
+
+    const handleImageSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setProfileImage(file);
+            const reader = new FileReader();
+            reader.onloadend = () => setImagePreview(reader.result);
+            reader.readAsDataURL(file);
+        }
+    };
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -43,8 +56,22 @@ export default function ProfileSetup() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="flex justify-center mb-6">
-                        <div className="w-24 h-24 rounded-full bg-[#0F172A] border-2 border-dashed border-[#28A745] flex items-center justify-center text-3xl cursor-pointer hover:bg-white/5 transition-colors">
-                            📷
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleImageSelect}
+                            accept="image/*"
+                            className="hidden"
+                        />
+                        <div
+                            onClick={() => fileInputRef.current.click()}
+                            className="w-24 h-24 rounded-full bg-[#0F172A] border-2 border-dashed border-[#28A745] flex items-center justify-center text-3xl cursor-pointer hover:bg-white/5 transition-colors overflow-hidden"
+                        >
+                            {imagePreview ? (
+                                <img src={imagePreview} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                                '📷'
+                            )}
                         </div>
                     </div>
 

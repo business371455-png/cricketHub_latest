@@ -78,7 +78,7 @@ export default function LandingPage() {
             <section
                 ref={heroRef}
                 className="relative flex flex-col items-center justify-center text-center px-4 sm:px-6 pt-16"
-                style={{ minHeight: '70vh' }}
+                style={{ minHeight: '65vh' }}
             >
                 {/* Background Image */}
                 <div className="absolute inset-0">
@@ -113,12 +113,12 @@ export default function LandingPage() {
             </section>
 
             {/* ───── HOW IT WORKS ───── */}
-            <section className="relative py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-12">
+            <section className="relative py-8 sm:py-10 md:py-14 px-4 sm:px-6 md:px-12">
                 {/* Subtle gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-b from-[#0a1628] via-[#0d1f3c] to-[#0a1628] pointer-events-none" />
 
                 <div className="relative z-10 max-w-5xl mx-auto">
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 md:mb-16">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-10">
                         How It Works
                     </h2>
 
@@ -143,7 +143,7 @@ export default function LandingPage() {
             </section>
 
             {/* ───── FOOTER ───── */}
-            <footer className="border-t border-white/5 py-6 sm:py-8 text-center text-gray-500 text-xs sm:text-sm px-4">
+            <footer className="border-t border-white/5 py-4 sm:py-5 text-center text-gray-500 text-xs sm:text-sm px-4">
                 © {new Date().getFullYear()} Cricket Match Hub. All rights reserved.
             </footer>
         </div>

@@ -75,7 +75,7 @@ export const verifyOtp = asyncHandler(async (req, res) => {
     if (!user) {
         user = await User.create({
             phone,
-            name: 'New User', // Placeholder, needs update in profile setup
+            name: 'New User',
         });
         isNewUser = true;
     }

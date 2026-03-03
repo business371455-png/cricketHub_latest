@@ -14,9 +14,6 @@ import { notFound, errorHandler } from './middleware/errorHandler.js';
 validateEnv();
 
 // Connect to database
-if (ENV.MONGODB_URI && ENV.MONGODB_URI.includes('mongodb')) {
-    connectDB();
-}
 
 const app = express();
 
@@ -98,5 +95,6 @@ app.use(errorHandler);
 
 const PORT = ENV.PORT || 5000;
 app.listen(PORT, () => {
+    connectDB();
     console.log(`Server running in ${ENV.NODE_ENV} mode on port ${PORT}`);
 });
