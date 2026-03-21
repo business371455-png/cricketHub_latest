@@ -43,7 +43,7 @@ export default function Login() {
             if (userData.isNewUser) {
                 navigate('/profile-setup');
             } else {
-                navigate('/home');
+                navigate('/my-matches');
             }
         } catch (err) {
             console.error('OTP Verification Error', err);

@@ -1,13 +1,8 @@
-import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import BottomTabNav from './BottomTabNav';
-import FAB from './FAB';
-import CreateMatchModal from '../CreateMatchModal.jsx';
 
 const AppLayout = () => {
-    const [isModalOpen, setModalOpen] = useState(false);
-
     return (
         <div className="flex h-screen bg-surface text-text overflow-hidden">
             {/* Desktop Sidebar */}
@@ -24,11 +19,7 @@ const AppLayout = () => {
                 <main className="min-h-full">
                     <Outlet />
                 </main>
-
-                <FAB onClick={() => setModalOpen(true)} />
             </div>
-
-            <CreateMatchModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} />
 
             {/* Mobile Bottom Tab Navigation */}
             <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">

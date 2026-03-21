@@ -82,6 +82,15 @@ export default function Profile() {
 
                     {/* Action Buttons */}
                     <div className="space-y-3">
+                        {!user.isOwner && (
+                            <button
+                                onClick={() => navigate('/my-teams')}
+                                className="w-full py-3 rounded-xl bg-blue-500/20 text-blue-400 font-bold hover:bg-blue-500/30 active:scale-[0.98] transition-all border border-blue-500/30 shadow-lg shadow-blue-500/10"
+                            >
+                                👥 My Teams
+                            </button>
+                        )}
+
                         <button
                             onClick={() => setShowEditModal(true)}
                             className="w-full py-3 rounded-xl bg-[#28A745] text-white font-bold hover:bg-[#218838] active:scale-[0.98] transition-all shadow-lg shadow-[#28A745]/30"
