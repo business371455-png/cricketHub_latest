@@ -320,7 +320,146 @@ This plan breaks the Cricket Connect MVP into **three major tracks**: Backend, F
 
 ---
 
+# 🎯 Track D — Open Challenge System ← **NEW TRACK**
+
+> **Mental Model:** _Open Challenge = "Public match invitation tied to a pre-booked slot"_
+>
+> State machine: `Open → Pending → Accepted → ConvertedToMatch → Completed`
+>                               `↘ Rejected`
+>                               `↘ Expired`
+
+---
+
+## Phase 26 — Open Challenge Model ← **NEW**
+
+- [ ] **D26.1** Create `OpenChallenge` model (`server/models/OpenChallenge.js`):
+  - `creatorId` (ref User, required)
+  - `teamId` (ref Team, optional)
+  - `teamName` (String, required)
+  - `groundId` (ref Ground, required)
+  - `bookingId` (ref Booking, required — enables slot-lock guarantee)
+  - `slotStart` / `slotEnd` (Date — copied from booking for fast querying)
+  - `matchType` (enum: Tennis / Leather / Box)
+  - `overs` (Number, 1–50)
+  - `playersRequired` (Number)
+  - `notes` (String, optional)
+  - `status` (enum: `Open | Pending | Accepted | Rejected | Expired | ConvertedToMatch`, default `Open`)
+  - `requests[]` sub-documents: `{ teamId, captainId, teamName, message, status (Pending/Accepted/Rejected), requestedAt }`
+  - `acceptedRequestId` (ObjectId — ref to winning request sub-doc)
+  - `matchId` (ref Match — populated on conversion)
+  - `expiresAt` (Date — auto-set to `slotStart − 24 h`)
+- [ ] **D26.2** Add compound index on `status + expiresAt` for efficient expiry queries
+- [ ] **D26.3** Add `2dsphere` index on `groundId` (via populate) for geo-filter support
+
+---
+
+## Phase 27 — Challenge Backend API ← **NEW**
+
+- [ ] **D27.1** Create `challengeController.js` (`server/controllers/challengeController.js`):
+  - `POST /api/challenges` — `createChallenge` (validates bookingId belongs to creator; sets `expiresAt`)
+  - `GET /api/challenges` — `getChallenges` (filter: `groundId`, `matchType`, `date`, status=`Open`)
+  - `GET /api/challenges/my` — `getMyChallenges` (all challenges by current user)
+  - `GET /api/challenges/:id` — `getChallengeById` (full detail + requests[])
+  - `PUT /api/challenges/:id/request` — `requestToJoin` (Team B sends join request; challenge flips to `Pending`)
+  - `PUT /api/challenges/:id/accept/:requestId` — `selectOpponent` (creator picks winner):
+    1. Mark chosen request → `Accepted`
+    2. Mark all others → `Rejected`
+    3. Create new `Match` doc (both teams, ground, slot, status `Confirmed`)
+    4. Set `challenge.matchId`, `challenge.status = 'ConvertedToMatch'`
+    5. Return new match
+  - `PUT /api/challenges/:id/reject/:requestId` — `rejectRequest` (creator rejects a specific request)
+  - `DELETE /api/challenges/:id` — `cancelChallenge` (creator only; blocked if already accepted)
+- [ ] **D27.2** Create `challengeRoutes.js` (`server/routes/challengeRoutes.js`) — all routes protected by `auth` middleware
+- [ ] **D27.3** Create `challengeValidator.js` (`server/validators/challengeValidator.js`) — Joi schemas for create & requestToJoin
+- [ ] **D27.4** Mount challenge routes in `server/index.js`: `app.use('/api/challenges', challengeRoutes)`
+
+---
+
+## Phase 28 — Expiry Cron Job ← **NEW**
+
+- [ ] **D28.1** Install `node-cron` in server (`npm install node-cron`)
+- [ ] **D28.2** Create `expiryCron.js` (`server/utils/expiryCron.js`):
+  - Runs every **30 minutes**
+  - Finds challenges where `status === 'Open'` AND `expiresAt <= now`
+  - Bulk-updates those to `status: 'Expired'`
+- [ ] **D28.3** Import and call `startExpiryCron()` in `server/index.js` after DB connect
+
+---
+
+## Phase 29 — Challenge Redux Slice ← **NEW**
+
+- [ ] **D29.1** Create `challengeSlice.js` (`client/src/features/challengeSlice.js`):
+  - State: `challenges[]`, `myChallenges[]`, `currentChallenge`, `loading`, `error`
+  - Async thunks: `fetchChallenges`, `fetchMyChallenges`, `fetchChallengeById`, `createChallenge`, `requestToJoin`, `selectOpponent`, `rejectRequest`, `cancelChallenge`
+- [ ] **D29.2** Wire `challengeSlice` into Redux store (`client/src/app/store.js`)
+
+---
+
+## Phase 30 — Challenge API Service ← **NEW**
+
+- [ ] **D30.1** Create `challengeService.js` (`client/src/services/challengeService.js`):
+  - All `axios` calls to `/api/challenges/*`
+  - Methods mirror controller endpoints
+
+---
+
+## Phase 31 — Challenge Board UI ← **NEW**
+
+- [ ] **D31.1** Create `ChallengeBoardPage.jsx` (`client/src/pages/ChallengeBoardPage.jsx`):
+  - Filter bar: matchType chips, date picker, ground name search input
+  - Staggered GSAP card entry animation
+  - Empty state with animated illustration when no challenges
+  - "Create Challenge" FAB button → opens `CreateChallengeModal`
+- [ ] **D31.2** Create `ChallengeCard.jsx` (`client/src/components/ChallengeCard.jsx`):
+  - Displays: team name, ground, date/time, match type, overs, players required, notes snippet
+  - Status badge: `Open` (green) / `Pending` (amber) / `Expired` (grey)
+  - CTA: "Request to Join" primary button
+- [ ] **D31.3** Create `CreateChallengeModal.jsx` (`client/src/components/CreateChallengeModal.jsx`):
+  - **Step 1** — Select pre-existing confirmed booking (dropdown from `bookingService.getMyBookings`)
+  - **Step 2** — Match details: matchType chips, overs slider, playersRequired, notes
+  - **Step 3** — Review summary card → "Publish Challenge" button
+  - GSAP slide transitions between steps
+
+---
+
+## Phase 32 — Challenge Detail UI ← **NEW**
+
+- [ ] **D32.1** Create `ChallengeDetailPage.jsx` (`client/src/pages/ChallengeDetailPage.jsx`):
+  - **Header**: ground name, date/time slot, match type, overs, team name
+  - **Status timeline**: visual stepper (Open → Pending → Accepted/Expired → Match Confirmed)
+  - **Creator view**: list of `RequestCard` sub-components per request:
+    - Shows requesting team name, captain, message
+    - "Accept" (green) + "Reject" (red) action buttons
+  - **Joiner view**: "Request to Join" button + optional message textarea; disabled with "Requested ✓" badge if already applied
+  - **Converted state**: link/button to view the confirmed Match detail
+
+---
+
+## Phase 33 — Routing & Navigation ← **NEW**
+
+- [ ] **D33.1** Add routes in `client/src/App.jsx`:
+  ```jsx
+  <Route path="/challenges" element={<ChallengeBoardPage />} />
+  <Route path="/challenges/:id" element={<ChallengeDetailPage />} />
+  ```
+- [ ] **D33.2** Add **"Challenges"** tab to bottom navigation (`BottomTabNav` component) with a cricket-bat icon, linking to `/challenges`
+
+---
+
+## Phase 34 — Integration & End-to-End Testing ← **NEW**
+
+- [ ] **D34.1** Test creator journey: Login → Book slot → Create Challenge → Browse board → Receive requests → Select opponent → Verify Match created
+- [ ] **D34.2** Test joiner journey: Login → Browse challenges with filters → Request to join → Wait → Confirm match notification
+- [ ] **D34.3** Test rejection flow: Creator rejects all requests → requestors see "Rejected" status
+- [ ] **D34.4** Test expiry: Set `expiresAt` to past date manually → verify cron marks as `Expired`
+- [ ] **D34.5** Test double-booking prevention: Verify accepting a challenge locks the slot (booking already pre-exists)
+- [ ] **D34.6** Test cancel: Creator cancels open challenge → confirm status becomes `Cancelled`
+
+---
+
 # Summary
+
+
 
 | Track | Phases | Status |
 |-------|--------|--------|
@@ -328,6 +467,7 @@ This plan breaks the Cricket Connect MVP into **three major tracks**: Backend, F
 | **Track A** — Backend | Phases 1-11 | Core done, **Team API + Match updates needed** |
 | **Track B** — Frontend | Phases 12-21 | Core pages done, **Team pages + Profile enhancements + SlotGrid + Ratings + Animations needed** |
 | **Track C** — Integration | Phases 22-25 | Partial, **Team wiring + missing features needed** |
+| **Track D** — Open Challenge | Phases 26-37 | 🆕 Not started |
 
 > [!IMPORTANT]
 > **New features to build (PRD gaps):**

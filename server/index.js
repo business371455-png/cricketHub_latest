@@ -58,6 +58,8 @@ import ratingRoutes from './routes/ratingRoutes.js';
 import earningsRoutes from './routes/earningsRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import teamRoutes from './routes/teamRoutes.js';
+import challengeRoutes from './routes/challengeRoutes.js';
+import { startExpiryCron } from './utils/expiryCron.js';
 
 // Routes
 app.get('/api/health', (req, res) => {
@@ -72,6 +74,7 @@ app.use('/api/ratings', ratingRoutes);
 app.use('/api/earnings', earningsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/teams', teamRoutes);
+app.use('/api/challenges', challengeRoutes);
 
 // ---------- Serve Frontend Build (Production) ----------
 const clientDistPath = path.resolve(__dirname, '../client/dist');
@@ -94,7 +97,8 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = ENV.PORT || 5000;
-app.listen(PORT, () => {
-    connectDB();
+app.listen(PORT, async () => {
+    await connectDB();
+    startExpiryCron();
     console.log(`Server running in ${ENV.NODE_ENV} mode on port ${PORT}`);
 });

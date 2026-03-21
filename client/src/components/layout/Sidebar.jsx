@@ -14,9 +14,11 @@ const Sidebar = () => {
         { name: 'Add Ground', path: '/owner/add-ground', icon: '🏟️' },
         { name: 'Profile', path: '/profile', icon: '👤' },
     ] : [
-        { name: 'Player Dashboard', path: '/home', icon: '🏏' },
+        { name: 'My Matches', path: '/my-matches', icon: '🏏' },
+        { name: 'Challenges', path: '/challenges', icon: '⚔️' },
         { name: 'Ground Search', path: '/grounds', icon: '🔍' },
         { name: 'My Bookings', path: '/bookings', icon: '📅' },
+        { name: 'My Teams', path: '/my-teams', icon: '👥' },
         { name: 'Profile', path: '/profile', icon: '👤' },
     ];
 

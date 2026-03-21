@@ -10,10 +10,10 @@ const BottomTabNav = () => {
         { name: 'Add', path: '/owner/add-ground', icon: '🏟️' },
         { name: 'Profile', path: '/profile', icon: '👤' },
     ] : [
-        { name: 'Home', path: '/home', icon: '🏠' },
         { name: 'Matches', path: '/my-matches', icon: '🏏' },
-        { name: 'Teams', path: '/my-teams', icon: '👥' },
+        { name: 'Challenges', path: '/challenges', icon: '⚔️' },
         { name: 'Search', path: '/grounds', icon: '🔍' },
+        { name: 'Bookings', path: '/bookings', icon: '📅' },
         { name: 'Profile', path: '/profile', icon: '👤' },
     ];
 

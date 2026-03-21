@@ -7,7 +7,7 @@ export default function MyMatches() {
     const { user } = useSelector(state => state.auth);
     const [matches, setMatches] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('all'); // all, open, confirmed, completed
+    const [filter, setFilter] = useState('confirmed');
 
     useEffect(() => {
         const fetchMyMatches = async () => {
@@ -27,11 +27,12 @@ export default function MyMatches() {
         ? matches
         : matches.filter(m => m.status.toLowerCase() === filter);
 
-    const statusFilters = ['all', 'open', 'confirmed', 'completed', 'cancelled'];
+    const statusFilters = ['confirmed', 'completed', 'all'];
 
     return (
         <div className="p-4 lg:p-8 pb-24 min-h-screen">
-            <h1 className="text-2xl font-bold text-white mb-4">My Matches</h1>
+            <h1 className="text-2xl font-bold text-white mb-1">🏏 Upcoming Matches</h1>
+            <p className="text-sm text-gray-400 mb-4">Confirmed matches you're going to play</p>
 
             {/* Filter Chips */}
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
@@ -55,9 +56,11 @@ export default function MyMatches() {
             ) : filteredMatches.length === 0 ? (
                 <div className="text-center py-16">
                     <div className="text-6xl mb-4">🏏</div>
-                    <h3 className="text-xl font-bold text-white mb-2">No Matches Found</h3>
+                    <h3 className="text-xl font-bold text-white mb-2">No Matches Yet</h3>
                     <p className="text-gray-400">
-                        {filter === 'all'
+                        {filter === 'confirmed'
+                            ? "No confirmed matches yet. Accept a challenge or wait for your challenge to be accepted!"
+                            : filter === 'all'
                             ? "You haven't joined any matches yet."
                             : `No ${filter} matches.`}
                     </p>

@@ -14,6 +14,8 @@ import Bookings from './pages/MyBookings.jsx';
 import MyTeams from './pages/MyTeams.jsx';
 import TeamDetail from './pages/TeamDetail.jsx';
 import MyMatches from './pages/MyMatches.jsx';
+import ChallengeBoardPage from './pages/ChallengeBoardPage.jsx';
+import ChallengeDetailPage from './pages/ChallengeDetailPage.jsx';
 
 function App() {
   return (
@@ -35,6 +37,8 @@ function App() {
         <Route path="/my-teams" element={<MyTeams />} />
         <Route path="/teams/:id" element={<TeamDetail />} />
         <Route path="/my-matches" element={<MyMatches />} />
+        <Route path="/challenges" element={<ChallengeBoardPage />} />
+        <Route path="/challenges/:id" element={<ChallengeDetailPage />} />
       </Route>
     </Routes>
   );
