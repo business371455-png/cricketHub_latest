@@ -14,38 +14,68 @@ export const createChallenge = asyncHandler(async (req, res) => {
         throw new Error(error.details[0].message);
     }
 
-    // Validate that the booking belongs to the creator
-    const booking = await Booking.findById(req.body.bookingId);
-    if (!booking) {
-        res.status(404);
-        throw new Error('Booking not found');
-    }
-    if (booking.userId.toString() !== req.user._id.toString()) {
-        res.status(403);
-        throw new Error('You can only create challenges for your own bookings');
-    }
+    let slotStart, slotEnd, bookingId;
 
-    // Check no existing open challenge for the same booking
-    const existingChallenge = await OpenChallenge.findOne({
-        bookingId: req.body.bookingId,
-        status: { $nin: ['Expired', 'Cancelled', 'Rejected'] },
-    });
-    if (existingChallenge) {
-        res.status(400);
-        throw new Error('A challenge already exists for this booking');
+    if (req.body.bookingId) {
+        // ── Path A: Linked to an existing booking (backward compatible) ──
+        const booking = await Booking.findById(req.body.bookingId);
+        if (!booking) {
+            res.status(404);
+            throw new Error('Booking not found');
+        }
+        if (booking.userId.toString() !== req.user._id.toString()) {
+            res.status(403);
+            throw new Error('You can only create challenges for your own bookings');
+        }
+
+        // Check no existing open challenge for the same booking
+        const existingChallenge = await OpenChallenge.findOne({
+            bookingId: req.body.bookingId,
+            status: { $nin: ['Expired', 'Cancelled', 'Rejected'] },
+        });
+        if (existingChallenge) {
+            res.status(400);
+            throw new Error('A challenge already exists for this booking');
+        }
+
+        slotStart = booking.slotStart;
+        slotEnd = booking.slotEnd;
+        bookingId = booking._id;
+    } else {
+        // ── Path B: No booking yet — create challenge with ground + time ──
+        slotStart = new Date(req.body.slotStart);
+        slotEnd = new Date(req.body.slotEnd);
+
+        // Validate slot is in the future
+        if (slotStart <= new Date()) {
+            res.status(400);
+            throw new Error('Slot start time must be in the future');
+        }
+
+        // Check no existing open challenge for same ground + same slot
+        const existingChallenge = await OpenChallenge.findOne({
+            groundId: req.body.groundId,
+            slotStart,
+            slotEnd,
+            status: { $nin: ['Expired', 'Cancelled', 'Rejected'] },
+        });
+        if (existingChallenge) {
+            res.status(400);
+            throw new Error('A challenge already exists for this ground and time slot');
+        }
     }
 
     // Auto-set expiresAt to 2 hours before the slot start time
-    const expiresAt = new Date(booking.slotStart.getTime() - 2 * 60 * 60 * 1000);
+    const expiresAt = new Date(slotStart.getTime() - 2 * 60 * 60 * 1000);
 
     const challenge = new OpenChallenge({
         creatorId: req.user._id,
         teamId: req.body.teamId || undefined,
         teamName: req.body.teamName,
         groundId: req.body.groundId,
-        bookingId: req.body.bookingId,
-        slotStart: booking.slotStart,
-        slotEnd: booking.slotEnd,
+        bookingId: bookingId || undefined,
+        slotStart,
+        slotEnd,
         matchType: req.body.matchType,
         overs: req.body.overs,
         playersRequired: req.body.playersRequired,

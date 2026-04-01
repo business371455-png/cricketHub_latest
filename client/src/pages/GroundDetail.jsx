@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getGroundById } from '../services/groundService.js';
 import { createBooking, verifyPayment } from '../services/bookingService.js';
 
-// Generate demo time slots for today
-const generateTodaySlots = () => {
-    const today = new Date().toISOString().split('T')[0];
+// Generate time slots for a given date (defaults to today)
+const generateSlots = (date) => {
+    const d = date ? new Date(date) : new Date();
     const slots = [
         { label: '06:00 AM – 08:00 AM', startH: 6, endH: 8, isBooked: false, priceMod: 0 },
         { label: '08:00 AM – 10:00 AM', startH: 8, endH: 10, isBooked: false, priceMod: 0 },
@@ -14,12 +14,18 @@ const generateTodaySlots = () => {
         { label: '04:00 PM – 06:00 PM', startH: 16, endH: 18, isBooked: false, priceMod: 0 },
         { label: '06:00 PM – 08:00 PM', startH: 18, endH: 20, isBooked: false, priceMod: 200 },
     ];
-    return slots.map((s, i) => ({
-        ...s,
-        id: String(i + 1),
-        slotStart: `${today}T${String(s.startH).padStart(2, '0')}:00:00.000Z`,
-        slotEnd: `${today}T${String(s.endH).padStart(2, '0')}:00:00.000Z`,
-    }));
+    return slots.map((s, i) => {
+        const start = new Date(d);
+        start.setHours(s.startH, 0, 0, 0);
+        const end = new Date(d);
+        end.setHours(s.endH, 0, 0, 0);
+        return {
+            ...s,
+            id: String(i + 1),
+            slotStart: start.toISOString(),
+            slotEnd: end.toISOString(),
+        };
+    });
 };
 
 export default function GroundDetail() {
@@ -83,7 +89,7 @@ export default function GroundDetail() {
     if (loading) return <div className="p-8 text-white">Loading...</div>;
     if (!ground) return null;
 
-    const displaySlots = generateTodaySlots();
+    const displaySlots = generateSlots();
     const groundTypeLabel = ground.groundType || 'Open Ground';
 
     return (

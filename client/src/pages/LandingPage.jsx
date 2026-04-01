@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import gsap from 'gsap';
 
 export default function LandingPage() {
+    const { isAuthenticated } = useSelector((state) => state.auth);
     const navigate = useNavigate();
     const heroRef = useRef(null);
     const cardsRef = useRef([]);
@@ -39,19 +41,19 @@ export default function LandingPage() {
 
     const features = [
         {
-            icon: '👥',
-            title: 'Join a Team',
-            desc: 'Browse active teams looking for players and join the squad that fits your style.',
+            icon: '📢',
+            title: 'Create a Challenge',
+            desc: 'Select a ground and time slot to issue an open challenge without paying upfront.',
         },
         {
-            icon: '⚔️',
-            title: 'Form a Team',
-            desc: 'Build your dream 11. Be the captain, recruit players, and challenge others.',
+            icon: '🤝',
+            title: 'Find Opponents',
+            desc: 'Let other teams request to join. Review and accept the team you want to play against.',
         },
         {
-            icon: '🏟️',
-            title: 'Play Matches',
-            desc: 'Book grounds, select your ball type, and schedule matches instantly.',
+            icon: '💳',
+            title: 'Pay & Play',
+            desc: 'Once a match is set, securely pay to confirm your booking slot and hit the pitch.',
         },
     ];
 
@@ -66,12 +68,21 @@ export default function LandingPage() {
                     <span className="text-[#28A745]">CricketHub</span>
                     <span className="text-xl sm:text-2xl">🏏</span>
                 </div>
-                <button
-                    onClick={() => navigate('/login')}
-                    className="px-4 sm:px-5 py-2 rounded-full border border-[#28A745] text-[#28A745] text-xs sm:text-sm font-semibold hover:bg-[#28A745] hover:text-white active:scale-95 transition-all duration-300 cursor-pointer"
-                >
-                    Log In
-                </button>
+                {isAuthenticated ? (
+                    <button
+                        onClick={() => navigate('/my-matches')}
+                        className="px-4 sm:px-5 py-2 rounded-full bg-[#28A745] text-white text-xs sm:text-sm font-semibold hover:bg-[#218838] active:scale-95 transition-all duration-300 cursor-pointer"
+                    >
+                        Dashboard
+                    </button>
+                ) : (
+                    <button
+                        onClick={() => navigate('/login')}
+                        className="px-4 sm:px-5 py-2 rounded-full border border-[#28A745] text-[#28A745] text-xs sm:text-sm font-semibold hover:bg-[#28A745] hover:text-white active:scale-95 transition-all duration-300 cursor-pointer"
+                    >
+                        Log In
+                    </button>
+                )}
             </nav>
 
             {/* ───── HERO ───── */}
@@ -103,12 +114,14 @@ export default function LandingPage() {
                     >
                         The ultimate platform to find teams, schedule matches, and dominate the pitch.
                     </p>
-                    <button
-                        onClick={() => navigate('/login')}
-                        className="hero-btn mt-6 sm:mt-10 inline-block px-8 sm:px-10 py-3 sm:py-4 rounded-lg bg-[#28A745] text-white font-bold text-xs sm:text-sm uppercase tracking-widest shadow-lg shadow-[#28A745]/30 hover:shadow-[#28A745]/50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
-                    >
-                        Get Started
-                    </button>
+                    {isAuthenticated ? (
+                        <button
+                            onClick={() => navigate('/my-matches')}
+                            className="hero-btn mt-6 sm:mt-10 inline-block px-8 sm:px-10 py-3 sm:py-4 rounded-lg bg-[#28A745] text-white font-bold text-xs sm:text-sm uppercase tracking-widest shadow-lg shadow-[#28A745]/30 hover:shadow-[#28A745]/50 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+                        >
+                            Go to Dashboard
+                        </button>
+                    ) : null}
                 </div>
             </section>
 

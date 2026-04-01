@@ -14,7 +14,7 @@ const Sidebar = () => {
         { name: 'Add Ground', path: '/owner/add-ground', icon: '🏟️' },
         { name: 'Profile', path: '/profile', icon: '👤' },
     ] : [
-        { name: 'My Matches', path: '/my-matches', icon: '🏏' },
+        { name: 'Matches', path: '/my-matches', icon: '🏏' },
         { name: 'Challenges', path: '/challenges', icon: '⚔️' },
         { name: 'Ground Search', path: '/grounds', icon: '🔍' },
         { name: 'My Bookings', path: '/bookings', icon: '📅' },
@@ -29,10 +29,9 @@ const Sidebar = () => {
     };
 
     return (
-        <aside className="h-full flex flex-col p-6">
-            <div className="mb-10 flex items-center gap-3">
-                <span className="text-3xl">🏏</span>
-                <h2 className="text-2xl font-bold text-white tracking-tight leading-tight">Cricket<br />Connect</h2>
+        <aside className="h-full flex flex-col p-7">
+            <div className="mb-10 flex items-center justify-center">
+                <h2 className="text-2xl font-bold text-white tracking-tight leading-tight"><a href="/">Cricket Hub</a></h2>
             </div>
 
             <nav className="flex-1 space-y-2">

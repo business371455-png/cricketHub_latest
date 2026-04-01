@@ -13,7 +13,7 @@ const AppLayout = () => {
             {/* Main Content Area */}
             <div className="flex-1 overflow-y-auto pb-16 lg:pb-0 relative bg-[#0F172A]">
                 <header className="sticky top-0 z-10 bg-[#0F172A]/80 backdrop-blur-md p-4 border-b border-[#1E293B] hidden lg:block">
-                    <h1 className="text-xl font-bold text-primary">Cricket Connect</h1>
+                    <h1 className="text-xl font-bold text-primary">Cricket Hub</h1>
                 </header>
 
                 <main className="min-h-full">

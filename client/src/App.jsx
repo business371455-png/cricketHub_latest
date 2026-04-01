@@ -1,4 +1,6 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { useEffect, useState } from 'react';
 import AppLayout from './components/layout/AppLayout.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 import Login from './pages/Login.jsx';
@@ -16,17 +18,61 @@ import TeamDetail from './pages/TeamDetail.jsx';
 import MyMatches from './pages/MyMatches.jsx';
 import ChallengeBoardPage from './pages/ChallengeBoardPage.jsx';
 import ChallengeDetailPage from './pages/ChallengeDetailPage.jsx';
+import { setCredentials, logout } from './features/auth/authSlice.js';
+import { getUserProfile } from './services/userService.js';
 
 function App() {
+  const { isAuthenticated, token } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(!!localStorage.getItem('token'));
+
+  // On app load, validate the stored token by hitting /users/me
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      getUserProfile()
+        .then((userData) => {
+          dispatch(setCredentials({ user: userData, token: storedToken }));
+        })
+        .catch(() => {
+          // Token is invalid or expired — clear everything
+          dispatch(logout());
+        })
+        .finally(() => {
+          setIsCheckingAuth(false);
+        });
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, [dispatch]);
+
+  // Show a minimal loading spinner while validating the token
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-[#0F172A] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-[#28A745] border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-400 text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Routes>
+      {/* Landing: always show landing page, buttons adapt based on auth */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<Login />} />
+
+      {/* Login: redirect authenticated users to dashboard */}
+      <Route
+        path="/login"
+        element={isAuthenticated ? <Navigate to="/my-matches" replace /> : <Login />}
+      />
+
       <Route path="/profile-setup" element={<ProfileSetup />} />
 
       {/* Routes with Navigation Layout */}
       <Route element={<AppLayout />}>
-        <Route path="/home" element={<PlayerHome />} />
         <Route path="/owner" element={<OwnerDashboard />} />
         <Route path="/owner/add-ground" element={<AddGroundForm />} />
         <Route path="/profile" element={<Profile />} />

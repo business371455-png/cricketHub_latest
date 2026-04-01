@@ -26,7 +26,7 @@ export default function PlayerHome() {
     return (
         <div className="p-4 lg:p-8 pb-24">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-white tracking-tight">Discover Matches</h1>
+                <h1 className="text-2xl font-bold text-white tracking-tight">Matches</h1>
                 <button className="bg-[#1E293B] hover:bg-[#28A745]/20 border border-[#ffffff10] text-gray-300 px-3 py-1.5 rounded-lg text-sm flex items-center gap-2 transition-colors">
                     <span>⚙️</span> Filter
                 </button>
